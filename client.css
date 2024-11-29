@@ -1,0 +1,122 @@
+body {
+  background-color: #8daed0;
+  font-size: 18px;
+  font-weight: 500;
+  font-family: "Cormorant Infant", serif;
+}
+strong {
+  color: #030303;
+  font-weight: 700;
+  font-size: 22px;
+}
+.chat-container {
+  background-color: #d9d3d3;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  padding: 10px;
+  height: 94vh;
+  overflow-y: scroll;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.message {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-bottom: 15px;
+}
+.chat-box .user-message {
+  padding: 5px;
+  width: 50%;
+  margin-bottom: 15px;
+  border-radius: 8px 8px 8px 0px;
+  border: 1px solid rgb(97, 97, 97);
+  background-color: rgb(205, 140, 202);
+}
+.chat-box .welcome-msg {
+  margin-bottom: 15px;
+  padding: 10px;
+  font-weight: 700;
+  font-size: 20px;
+  border-radius: 6px;
+  background-color: #c5c9aa;
+}
+.user-count {
+  margin-bottom: 15px;
+  padding: 10px;
+  font-weight: 700;
+  font-size: 20px;
+  border-radius: 6px;
+  background-color: #c5c9aa;
+}
+.chat-box .newMessage {
+  padding: 5px;
+  border-radius: 8px 8px 0 8px;
+  border: 1px solid rgb(97, 97, 97);
+  background-color: rgb(176, 126, 207);
+  margin-left: 50%;
+  width: 50%;
+  text-align: start;
+  margin-bottom: 15px;
+}
+.form-control {
+  margin-right: 14px;
+}
+.btn {
+  background-color: #4caf50;
+  color: #ffffff;
+  border: 1px solid #435d77;
+  border-radius: 5px;
+  padding: 8px 16px;
+  width: 80px;
+  cursor: pointer;
+}
+h5 {
+  color: #030303;
+  font-weight: 700;
+  padding: 10px;
+  font-size: 24px;
+  border-radius: 6px;
+  background-color: #b6d2b8;
+}
+.profile {
+  border-radius: 50%;
+  width: 40px;
+  margin: 10px;
+}
+.connected-users {
+  background-color: #d9d3d3;
+  border: 1px solid #c2c1c1;
+  border-radius: 8px;
+  padding: 10px;
+  height: 94vh;
+  font-size: 22px;
+  text-align: center;
+}
+.send-message-container {
+  display: flex;
+  justify-content: space-between;
+}
+/* create responsiveness for screen size less than 1060 */
+
+@media screen and (max-width: 1060px) {
+  .row {
+    display: flex;
+    flex-direction: column;
+  }
+  .chat-container {
+    margin: 0;
+    height: 80vh;
+    width: 100vw;
+  }
+  .chat-box .user-message,
+  .chat-box .newMessage {
+    width: 50%;
+  }
+  .connected-users {
+    align-self: flex-end;
+    width: 100vw;
+    height: auto;
+  }
+}

@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ChatterUp</title>
+    <!-- bootstrap css cdn link -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+      crossorigin="anonymous"
+    />
+    <!-- bootstrap js cdn link -->
+    <script
+      defer
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+      crossorigin="anonymous"
+    ></script>
+    <!-- font cdn link -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Infant:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=PT+Serif:ital,wght@0,400;0,700;1,400;1,700&family=Roboto+Slab:wght@100..900&display=swap"
+      rel="stylesheet"
+    />
+    <!-- external css file link -->
+    <link rel="stylesheet" href="client.css" />
+  </head>
+  <body>
+    <div class="fluid-container m-4">
+      <div class="row">
+        <!-- Chat Box -->
+        <div class="col-10">
+          <div class="chat-container">
+            <div class="chat-box" id="chat-box">
+              <!-- new user welcome msg -->
+              <!-- <div class="users-data"> -->
+              <div class="welcome-msg"></div>
+
+              <!-- </div> -->
+              <div class="user-message">
+                <strong>Coders: </strong> Hello, learner! Let's get to know each
+                other by sharing your name, city, and dream.
+              </div>
+            </div>
+            <div class="send-message-container">
+              <input
+                type="text"
+                class="form-control mt-3"
+                id="message-input"
+                placeholder="Enter your message..."
+              />
+              <button
+                type="button"
+                id="send-message"
+                class="btn btn-primary mt-3"
+              >
+                Send
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Connected Users -->
+        <div class="col-2">
+          <div class="connected-users" id="connected-users">
+            <h5>Connected Users</h5>
+            <ul class="list-unstyled"></ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Including the Socket.io client library in script  -->
+    <script src="http://localhost:3000/socket.io/socket.io.js"></script>
+
+    <script>
+      // Initialize a connection to the server
+      const socket = io.connect("http://localhost:3000");
+
+      // creating variables
+      let typingTimeout;
+      let userCount = 0;
+
+      //   get name from the user
+      const userName = prompt(
+        "Enter Your Name To Join The ChatterUp Application...!✍️💁‍♂️✅"
+      );
+      //   emit username to the server
+      socket.emit("join", userName);
+
+      //   get the required elements
+      const messageList = document.getElementById("chat-box");
+      const welcomeMessage = document.querySelector(".welcome-msg");
+      const userCountMessage = document.querySelector(".user-count");
+      const messageInput = document.getElementById("message-input");
+      const sendMessageBtn = document.getElementById("send-message");
+      const usersList = document.querySelector(".list-unstyled");
+      // Emit typing event when the user starts typing
+      messageInput.addEventListener("input", () => {
+        socket.emit("typing", { user: userName });
+        clearTimeout(typingTimeout);
+
+        // Stop typing after 2 seconds of inactivity
+        typingTimeout = setTimeout(() => {
+          socket.emit("stopTyping");
+        }, 2000);
+      });
+
+      //   handle sending messages to the server
+      sendMessageBtn.addEventListener("click", function (e) {
+        e.preventDefault();
+        const message = messageInput.value;
+        if (message) {
+          socket.emit("new_message", message);
+          messageInput.value = "";
+          // Stop typing indicator
+          socket.emit("stopTyping");
+        }
+      });
+
+      //   load previous messages
+      socket.on("previous_messages", (messages) => {
+        messages.forEach((msg) => {
+          if (msg.userName == userName) {
+            const newMessage = document.createElement("div");
+            newMessage.className = "newMessage";
+            newMessage.innerHTML = `<strong>${msg.userName}:</strong> ${msg.text}`;
+            messageList.appendChild(newMessage);
+          }
+        });
+      });
+
+      //   handle incoming messages from the server
+      socket.on("broadcast_message", function (msg) {
+        const newMessage = document.createElement("div");
+        newMessage.className = "newMessage";
+        newMessage.innerHTML = `<strong>${msg.username}:</strong> ${msg.message}`;
+        messageList.appendChild(newMessage);
+      });
+
+      // Show "User is typing..." indicator
+      socket.on("typing", (data) => {
+        welcomeMessage.textContent = `${data.user} is typing...`;
+      });
+
+      // total number of users connected
+      socket.on("total_users", () => {
+        usersList.forEach((user) => {
+          console.log(user);
+          if (user.innerText) {
+            userCount++;
+          }
+        });
+        userCountMessage.textContent = `Total Users: ${userCount}`;
+        welcomeMessage.appendChild(userCountMessage);
+      });
+
+      // Hide "User is typing..." indicator
+      socket.on("stopTyping", () => {
+        welcomeMessage.textContent = `Welcome, ${userName}!`;
+      });
+
+      //  handle user disconnection from the chat
+      socket.on("user_disconnected", (data) => {
+        welcomeMessage.textContent = `${data} disconnected the chat 😕❎!`;
+      });
+
+      // handle user joining the chat
+      socket.on("new_user", function (data) {
+        const newUserList = document.createElement("li");
+        newUserList.className = "text-success";
+        newUserList.innerText = "●" + data;
+        usersList.appendChild(newUserList);
+
+        const welcomeMsg = ` ● Welcome ${data}`;
+        welcomeMessage.innerText = welcomeMsg;
+      });
+    </script>
+  </body>
+</html>
